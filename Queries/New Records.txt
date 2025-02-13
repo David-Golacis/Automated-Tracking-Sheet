@@ -1,0 +1,54 @@
+WITH subcon_tests AS (
+
+SELECT DISTINCT sample.id_numeric
+
+FROM test
+
+INNER JOIN sample
+	ON sample.id_numeric = test.sample
+
+WHERE
+	test.laboratory_id = 'SUB_CON'
+	AND sample.recd_date >= TRUNC ( sysdate ) - 7
+	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0 )
+
+
+SELECT
+	TRIM ( sample.id_numeric ) AS sample_no,
+	TRUNC ( sample.recd_date ) AS date_received,
+	TRIM ( sample.customer_id ),
+	TRIM ( sample.login_by ),
+	TRIM ( sample.template_id ),
+	CASE WHEN
+		INSTR ( UPPER ( sample.collected_from ), 'RESAMPLE' ) > 0
+		THEN 'Y'
+		ELSE ''
+		END AS resample,
+	CASE WHEN
+		TO_CHAR ( sample.recd_date, 'Dy' ) = 'Sat'
+		THEN 'Y'
+	WHEN
+		TO_CHAR ( sample.recd_date, 'Dy' ) = 'Sun'
+		THEN 'Y'
+		ELSE ''
+		END AS weekend_work,
+	CASE WHEN
+		subcon_tests.id_numeric > 0
+		THEN 'Y'
+		ELSE ''
+		END AS subcon,
+	CASE WHEN
+		sample.status = 'X'
+		THEN 'Y'
+		ELSE ''
+		END AS cancelled,
+	sample.collected_from
+
+FROM sample
+
+LEFT JOIN subcon_tests
+	ON subcon_tests.id_numeric = sample.id_numeric
+
+WHERE
+	sample.recd_date >= TRUNC ( sysdate ) - 7
+	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0

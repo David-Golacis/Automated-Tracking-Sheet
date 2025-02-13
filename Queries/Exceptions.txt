@@ -1,0 +1,21 @@
+SELECT
+	sample.id_numeric,
+	result.name,
+	result.text
+
+
+FROM sample
+
+INNER JOIN test
+	ON test.sample = sample.id_numeric
+
+INNER JOIN result
+	ON result.test_number = test.test_number
+
+
+WHERE
+	result.status NOT IN ( 'U', 'X' )
+	AND result.result_type IN ( 'N', 'K' )
+	AND result.out_of_range = 'T'
+	AND LENGTH ( TRIM ( sample.customer_id ) ) <> 0
+	AND result.entered_on >= TRUNC ( sysdate ) - 7

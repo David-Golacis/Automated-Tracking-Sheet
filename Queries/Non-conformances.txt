@@ -1,0 +1,21 @@
+SELECT
+	TRIM ( sample.id_numeric ) AS sample_no,
+	TRUNC ( result.entered_on ),
+	result.text
+
+
+FROM sample
+
+INNER JOIN test
+	ON test.sample = sample.id_numeric
+
+INNER JOIN result
+	ON result.test_number = test.test_number
+
+
+WHERE
+	LENGTH ( TRIM ( sample.customer_id ) ) > 0
+	AND result.entered_on >= TRUNC ( sysdate ) - 50
+	AND test.analysis = 'NON_CONF_S'
+	AND result.name IN ( 'Text comment 1', 'Text comment 2' )
+	AND result.status IN ( 'A', 'C' )

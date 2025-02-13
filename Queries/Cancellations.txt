@@ -1,0 +1,18 @@
+SELECT
+	TRIM ( sample.id_numeric ) AS sample_no,
+	TRUNC ( sample.date_authorised ) AS cancelled_date	
+
+FROM
+	test
+
+INNER JOIN sample
+	ON sample.id_numeric = test.sample
+
+WHERE
+	sample.status IN ( 'X' )
+	AND ( 
+		( sample.date_authorised >= ( TRUNC ( sysdate ) - 30 ) )
+		AND
+		( sample.date_authorised < TRUNC ( sysdate ) )
+	)
+	AND LENGTH ( TRIM ( sample.customer_id ) ) <> 0

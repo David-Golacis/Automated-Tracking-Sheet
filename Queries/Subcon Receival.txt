@@ -1,0 +1,18 @@
+SELECT
+	TRIM ( sample.id_numeric ) AS sample_no,
+	result.entered_on,
+	test.analysis
+
+FROM sample
+
+INNER JOIN test
+	ON test.sample = sample.id_numeric
+
+INNER JOIN result
+	ON result.test_number = test.test_number
+
+WHERE
+	result.entered_on >= TRUNC ( sysdate ) - 7
+	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
+	AND test.laboratory_id = 'SUB_CON'
+	AND TRIM ( result.text ) IS NOT NULL

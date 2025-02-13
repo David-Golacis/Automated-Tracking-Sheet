@@ -1,0 +1,20 @@
+SELECT
+	TRIM ( sample.id_numeric ) AS sample_no,
+	TRUNC ( result.date_authorised ) AS authorisation_date,
+	TRIM ( result.authoriser ) AS authoriser
+
+FROM
+	result
+
+INNER JOIN test
+	ON test.test_number = result.test_number
+
+INNER JOIN sample
+	ON sample.id_numeric = test.sample
+
+WHERE
+	result.status IN ( 'A' )
+	AND test.analysis IN ( 'MATRIX' )
+	AND test.date_authorised >= ( TRUNC ( sysdate ) - 8 )
+	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
+	AND sample.status NOT IN ( 'X', 'U' )
