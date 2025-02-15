@@ -2,7 +2,9 @@
  
 ## 1.0	Overview
 
-1.1	The Commercial team’s Tracking Sheet contains details regarding samples for external stakeholders. The full details can be found at this link.
+1.1	The Commercial team’s Tracking Sheet contains details regarding samples for external stakeholders. The full details can be found below.
+
+> [Tracking Sheet Guidance Document](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Documentation/Tracking%20Sheet.pdf).
 
 1.2	This spreadsheet is filled out hourly using Business Objects, Power Automate, and Excel Online. This document outlines how this system operates and manages the risks associated with data entry errors.
 
