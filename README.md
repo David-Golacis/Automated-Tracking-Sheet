@@ -1,20 +1,20 @@
 # Automated Tracking Sheet
  
-## 1.0	Overview
+## Overview
 
-1.1	The Commercial team’s Tracking Sheet contains details regarding samples for external stakeholders. The full details can be found below.
+The Commercial team’s Tracking Sheet contains details regarding samples for external stakeholders. The full details can be found below.
 
 > [Tracking Sheet Guidance Document](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Documentation/Tracking%20Sheet.pdf).
 
-1.2	This spreadsheet is filled out hourly using Business Objects, Power Automate, and Excel Online. This document outlines how this system operates and manages the risks associated with data entry errors.
+This spreadsheet is filled out hourly using Business Objects, Power Automate, and Excel Online. This document outlines how this system operates and manages the risks associated with data entry errors.
 
-1.3	This project uses 7 flows to extract data from LIMS for new sample details, exceedances, non-conformances, authorised customer information, subcon receival, and cancellations.
+This project uses 7 flows to extract data from LIMS for new sample details, exceedances, non-conformances, authorised customer information, subcon receival, and cancellations.
 
-1.4	The flows work by monitoring David.Golacis’ inbox for keywords in the email’s title, sent from the Enquiries.Commercial address.
+The flows work by monitoring David.Golacis’ inbox for keywords in the email’s title, sent from the Enquiries.Commercial address.
 
-	Once the conditions have been met, the XLSX attachment from the report is saved on OneDrive for processing, beginning by converting the cell range into a table, extracting the data as JSON objects, and merging changes with the Tracking Sheet.
+Once the conditions have been met, the XLSX attachment from the report is saved on OneDrive for processing, beginning by converting the cell range into a table, extracting the data as JSON objects, and merging changes with the Tracking Sheet.
 
-1.5	Process map for the order of operations:
+Process map for the order of operations:
 
 
 
