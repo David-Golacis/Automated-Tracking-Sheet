@@ -16,107 +16,67 @@ Once the conditions have been met, the XLSX attachment from the report is saved 
 
 Process map for the order of operations:
 
-![Process Map](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Process%20Map.png)
+>![Process Map](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Process%20Map.png)
 
-1.6	Queries are received throughout the day to reduce conflict caused by multiple cells being edited in parallel. The schedule of queries goes as follows:
+Queries are received throughout the day to reduce conflict caused by multiple cells being edited in parallel. The schedule of queries goes as follows:
 
-Time of Day (24-hrs)	Process
-07:00	Sort table
-13:00	Authorised samples
-14:00	Exceptions
-15:00	Non-conformances
-19:00	New records
-20:00	Cancellations
-21:00	Received subcon results
+|     Time   of Day (24-hrs)    |     Process                    |
+|-------------------------------|--------------------------------|
+|     07:00                     |     Sort table                 |
+|     13:00                     |     Authorised samples         |
+|     14:00                     |     Exceptions                 |
+|     15:00                     |     Non-conformances           |
+|     19:00                     |     New records                |
+|     20:00                     |     Cancellations              |
+|     21:00                     |     Received Subcon results    |
 
+Schedule visualised:
 
+>![Schedule](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Schedule.png)
 
-
-
-
-1.7	Each query contains the last 10 days of data meeting the specified conditions. This helps manage risk by providing redundancy for the system. By allowing a flow to process the same data multiple times, the effect of errors which result in incomplete actions was reduced.
+Each query contains the last 10 days of data meeting the specified conditions. This helps manage risk by providing redundancy for the system. By allowing a flow to process the same data multiple times, the effect of errors which resulted in incomplete actions was reduced.
 
 
 ## 2.0	Maintenance
 
-2.1	At the end of the calendar year, only the main sheets require adjustments to continue operation. This is because the year within the document’s title defines which entries can be entered.
+At the end of the calendar year, only the main sheets require adjustments to continue operation. This is because the year within the document’s title defines which entries can be entered.
 
-	By storing the current and previous year’s sheets together in a folder, both sheets can be processed in parallel and keep only relevant records from being written, enabling redundancy of data within the query and bypassing the requirement of filtering out mismatched year's data from the initial query.
+By storing the current and previous year’s sheets together in a folder, both sheets can be processed in parallel and keep only relevant records from being written, enabling redundancy of data within the query and bypassing the requirement of filtering out mismatched year's data from the initial query.
 
-	Teams: Commercial Team/ Documents/ General/ Admin/ Booking Sheet
+Teams: Commercial Team/ Documents/ General/ Admin/ Booking Sheet
 
- 
+Need picture <<
 
-2.2	In December 2025, create a fresh copy of the Booking Sheet, 2026, for the following year. Later in February, archive the 2025 year’s sheet once all samples have been reported and invoiced.
+In December 2025, create a fresh copy of the Booking Sheet, 2026, for the following year. Later in February, archive the 2025 year’s sheet once all samples have been reported and invoiced.
 	
-2.3	Flows require no amending due to the dynamic variables used to calculate what the ending year of the current and previous year’s sheets should be relative to the current UTC.
+Flows require no amending due to the dynamic variables used to calculate what the ending year of the current and previous year’s sheets should be relative to the current UTC.
 
-	Previous year variable:
+Previous year variable:
 
+>![Previous Year](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Previous%20Year.png)
 
+Current year variable:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	Current year variable:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+>![Current Year](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Current%20Year.png)
 
 ## 3.0	Data Governance
 
-3.1	All Business Objects files (SQL reports) are stored online at Affinity's BO Portal within this location:
+All Business Objects files (SQL reports) are stored online at Affinity's BO Portal within this location:
 
-	Public Folders/ Sample Manager/ Booking Sheet
+> Public Folders/ Sample Manager/ Booking Sheet
 
+Need picture here <<
 
-
-
-
-
-
-
-
-
-
-
-
-3.2	Queries, flows and Excel scripts are provided in the appendix.
+Queries, flows and Excel scripts are provided in the appendix.
 
 
 ## 4.0	Detailed Design
 
 4.1	Design of reports
 
-4.1.1	Business Objects was used to both generate and deliver scheduled queries from an Oracle database.
+Business Objects was used to generate and deliver scheduled queries from an Oracle database.
 
-4.1.2	These queries shared safety features which were used to restrict which data was pulled from the cloud, reducing the memory usage of the server and improving processing speed.
+These queries shared safety features which were used to restrict which data was pulled from the cloud, reducing the memory usage of the server and improving processing speed.
 
 
 
