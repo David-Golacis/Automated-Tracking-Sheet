@@ -16,12 +16,7 @@ Once the conditions have been met, the XLSX attachment from the report is saved 
 
 Process map for the order of operations:
 
-
-
-
-
-
-
+![Process Map](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Process%20Map.png)
 
 1.6	Queries are received throughout the day to reduce conflict caused by multiple cells being edited in parallel. The schedule of queries goes as follows:
 
