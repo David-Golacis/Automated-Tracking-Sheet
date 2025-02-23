@@ -49,7 +49,7 @@ Need picture <<
 
 In December 2025, create a fresh copy of the Booking Sheet, 2026, for the following year. Later in February, archive the 2025 year’s sheet once all samples have been reported and invoiced.
 	
-Flows require no amending due to the dynamic variables used to calculate what the ending year of the current and previous year’s sheets should be relative to the current UTC.
+Flows require no amendment due to the dynamic variables used to calculate the year in which the ending year of the current and previous years' sheets should be relative to the current UTC.
 
 Previous year variable:
 
@@ -67,59 +67,60 @@ All Business Objects files (SQL reports) are stored online at Affinity's BO Port
 
 Need picture here <<
 
-Queries, flows and Excel scripts are provided in the appendix.
+Queries, flows, and Excel scripts are provided in the appendix.
 
 
 ## 4.0	Detailed Design
 
-4.1	Design of reports
+Design of reports
 
-Business Objects was used to generate and deliver scheduled queries from an Oracle database.
+Business Objects generated and delivered scheduled queries from an Oracle database.
 
-These queries shared safety features which were used to restrict which data was pulled from the cloud, reducing the memory usage of the server and improving processing speed.
+These queries shared safety features which were used to restrict which data was pulled from the cloud, reducing the server's memory usage and improving processing speed.
 
 
 
 Techniques used to hone searches were:
 
 •	Limiting the date range used:
-WHERE
-	sample.recd_date >= TRUNC ( sysdate ) - 7
+>WHERE
+>
+>>	sample.recd_date >= TRUNC ( sysdate ) - 7
 
 •	Fetching samples with an associated customer ID:
-WHERE
-	LENGTH ( TRIM ( sample.customer_id ) ) > 0
+>WHERE
+>>	LENGTH ( TRIM ( sample.customer_id ) ) > 0
 
 •	Specifying which sample and/ or result status was required:
-WHERE
-	result.status IN ( 'A' )
-	AND sample.status NOT IN ( 'X', 'U' )
+>WHERE
+>>	result.status IN ( 'A' )
+>>	AND sample.status NOT IN ( 'X', 'U' )
 
 •	Utilizing parameter names:
-WHERE
-	test.analysis IN ( 'MATRIX' )
+>WHERE
+>>	test.analysis IN ( 'MATRIX' )
 
 •	Using CTEs to left-join additional information:
-WITH subcon_tests AS (
- 
-SELECT
-	DISTINCT test.sample
+>WITH subcon_tests AS (
+>> 
+>>SELECT
+>>>	DISTINCT test.sample
+>
+>
+>>FROM test
+>
+>>INNER JOIN sample
+>>>	ON sample.id_numeric = test.sample
+>
+>
+>>WHERE
+>>>	test.laboratory_id = 'SUB_CON'
+>>>	AND sample.recd_date >= TRUNC ( sysdate ) - 7
+>>>	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
+>)
 
-
-FROM test
-
-INNER JOIN sample
-	ON sample.id_numeric = test.sample
-
-
-WHERE
-	test.laboratory_id = 'SUB_CON'
-	AND sample.recd_date >= TRUNC ( sysdate ) - 7
-	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
-)
-
-LEFT JOIN subcon_tests
-	ON subcon_tests.sample = sample.id_numeric
+>LEFT JOIN subcon_tests
+>>	ON subcon_tests.sample = sample.id_numeric
 
 4.1.3	The selection followed a pattern of searching for an ID, a parameter of interest, and a date of when this change had occurred. All samples compliant with the filtering conditions were be delivered to the next step.
 	
