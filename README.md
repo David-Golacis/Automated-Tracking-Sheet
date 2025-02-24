@@ -72,72 +72,78 @@ Queries, flows, and Excel scripts are provided in the appendix.
 
 ## 4.0	Detailed Design
 
-Design of reports
+### Design of reports
 
 Business Objects generated and delivered scheduled queries from an Oracle database.
 
 These queries shared safety features which were used to restrict which data was pulled from the cloud, reducing the server's memory usage and improving processing speed.
 
-
-
 Techniques used to hone searches were:
 
 •	Limiting the date range used:
->WHERE
->
->>	sample.recd_date >= TRUNC ( sysdate ) - 7
+```
+WHERE
+
+	sample.recd_date >= TRUNC ( sysdate ) - 7
+```
 
 •	Fetching samples with an associated customer ID:
->WHERE
->>	LENGTH ( TRIM ( sample.customer_id ) ) > 0
+```
+WHERE
+	LENGTH ( TRIM ( sample.customer_id ) ) > 0
+```
 
 •	Specifying which sample and/ or result status was required:
->WHERE
->>	result.status IN ( 'A' )
->>	AND sample.status NOT IN ( 'X', 'U' )
+```
+WHERE
+	result.status IN ( 'A' )
+	AND sample.status NOT IN ( 'X', 'U' )
+```
 
 •	Utilizing parameter names:
->WHERE
->>	test.analysis IN ( 'MATRIX' )
+```
+WHERE
+	test.analysis IN ( 'MATRIX' )
+```
 
 •	Using CTEs to left-join additional information:
->WITH subcon_tests AS (
->> 
->>SELECT
->>>	DISTINCT test.sample
->
->
->>FROM test
->
->>INNER JOIN sample
->>>	ON sample.id_numeric = test.sample
->
->
->>WHERE
->>>	test.laboratory_id = 'SUB_CON'
->>>	AND sample.recd_date >= TRUNC ( sysdate ) - 7
->>>	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
->)
+```
+WITH subcon_tests AS (
+ 
+SELECT
+	DISTINCT test.sample
 
->LEFT JOIN subcon_tests
->>	ON subcon_tests.sample = sample.id_numeric
 
-4.1.3	The selection followed a pattern of searching for an ID, a parameter of interest, and a date of when this change had occurred. All samples compliant with the filtering conditions were be delivered to the next step.
+FROM test
+
+INNER JOIN sample
+	ON sample.id_numeric = test.sample
+
+
+WHERE
+	test.laboratory_id = 'SUB_CON'
+	AND sample.recd_date >= TRUNC ( sysdate ) - 7
+	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
+)
+```
+```
+LEFT JOIN subcon_tests
+	ON subcon_tests.sample = sample.id_numeric
+```
+
+The selection followed a pattern of searching for an ID, a parameter of interest, and a date of when this change occurred. All samples that were compliant with the filtering conditions were delivered to the next step.
 	
-Sample No	Entered On	Parameter
-2688527	14 Jan 2025	LEGIONELLA
-2688527	14 Jan 2025	LEGIONELLA
-2688528	14 Jan 2025	LEGIONELLA
+| Sample No | Entered On  | Parameter  |
+|-----------|-------------|------------|
+| 2688527   | 14 Jan 2025 | LEGIONELLA |
+| 2688527   | 14 Jan 2025 | LEGIONELLA |
+| 2688528   | 14 Jan 2025 | LEGIONELLA |
 
+###	Design of flows
 
+Once an email containing the report had been received, a Power Automate flow attempts to match the title of the email to keywords. If a match was found, a series of steps take place to save the attached XLSX file for processing.
 
-
-
-4.2	Design of flows
-
-4.2.1	Once an email containing the report had been received, a Power Automate flow attempts to match the title of the email to keywords. If a match was found, a series of steps take place to save the attached XLSX file for processing.
-
-	To assure reliability, conditional filters were used to eliminate problems which could occur during an action. Considerations included were:
+To assure reliability, conditional filters were used to eliminate problems which could occur during an action. Considerations included were:
 
 •	Confirmation of email requirements:
  
