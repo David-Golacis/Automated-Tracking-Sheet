@@ -37,13 +37,13 @@ Schedule visualised:
 Each query contains the last 10 days of data meeting the specified conditions. This helps manage risk by providing redundancy for the system. By allowing a flow to process the same data multiple times, the effect of errors which resulted in incomplete actions was reduced.
 
 
-## 2.0	Maintenance
+## Maintenance
 
-At the end of the calendar year, only the main sheets require adjustments to continue operation. This is because the year within the document’s title defines which entries can be entered.
+At the end of the calendar year, only the main sheets require adjustments to continue operating. This is because the year within the document’s title defines which entries can be entered.
 
 By storing the current and previous year’s sheets together in a folder, both sheets can be processed in parallel and keep only relevant records from being written, enabling redundancy of data within the query and bypassing the requirement of filtering out mismatched year's data from the initial query.
 
-Teams: Commercial Team/ Documents/ General/ Admin/ Booking Sheet
+> Teams: Commercial Team/ Documents/ General/ Admin/ Booking Sheet
 
 Need picture <<
 
@@ -59,7 +59,7 @@ Current year variable:
 
 >![Current Year](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Current%20Year.png)
 
-## 3.0	Data Governance
+## Data Governance
 
 All Business Objects files (SQL reports) are stored online at Affinity's BO Portal within this location:
 
@@ -67,10 +67,10 @@ All Business Objects files (SQL reports) are stored online at Affinity's BO Port
 
 Need picture here <<
 
-Queries, flows, and Excel scripts are provided in the appendix.
+Queries, flows, and Excel scripts are provided in the [appendix](#appendix).
 
 
-## 4.0	Detailed Design
+## Detailed Design
 
 ### Design of reports
 
@@ -268,7 +268,7 @@ Sample No	Auth Date	Auth Initials
 2691778	14 Jan 2025	GOLACISD
 
 
-## 5.0	Appendix
+## Appendix
 
 5.1	Business Objects material
 
