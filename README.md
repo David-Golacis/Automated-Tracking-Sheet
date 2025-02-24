@@ -2,17 +2,17 @@
  
 ## Overview
 
-The Commercial team’s Tracking Sheet contains details regarding samples for external stakeholders. The full details can be found below.
+The Commercial team’s Tracking Sheet includes information about samples for external stakeholders. The complete details are provided below.
 
 > [Tracking Sheet Guidance Document](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Documentation/Tracking%20Sheet.pdf).
 
-This spreadsheet is filled out hourly using Business Objects, Power Automate, and Excel Online. This document outlines how this system operates and manages the risks associated with data entry errors.
+This spreadsheet is updated hourly using Business Objects, Power Automate, and Excel Online. This document outlines how this system functions and manages the risks associated with data entry errors.
 
-This project uses 7 flows to extract data from LIMS for new sample details, exceedances, non-conformances, authorised customer information, subcon receival, and cancellations.
+This project uses 7 flows to extract data from LIMS regarding new sample details, exceedances, non-conformances, authorised customer information, subcon receival, and cancellations.
 
-The flows work by monitoring David.Golacis’ inbox for keywords in the email’s title, sent from the Enquiries.Commercial address.
+The flows operate by monitoring David.Golacis’ inbox for keywords in the email’s title, sent from the Enquiries.Commercial address.
 
-Once the conditions have been met, the XLSX attachment from the report is saved on OneDrive for processing, beginning by converting the cell range into a table, extracting the data as JSON objects, and merging changes with the Tracking Sheet.
+After meeting the conditions, the XLSX report attachment is saved to OneDrive for processing. This begins with converting the cell range into a table, extracting the data as JSON objects, and merging changes with the Tracking Sheet.
 
 Process map for the order of operations:
 
@@ -34,22 +34,22 @@ Schedule visualised:
 
 >![Schedule](https://github.com/David-Golacis/Automated-Tracking-Sheet/blob/main/Images/Schedule.png)
 
-Each query contains the last 10 days of data meeting the specified conditions. This helps manage risk by providing redundancy for the system. By allowing a flow to process the same data multiple times, the effect of errors which resulted in incomplete actions was reduced.
+Each query contains data from the past 10 days that meet the specified conditions. This aids in risk management by ensuring redundancy within the system, allowing a flow to process the same data multiple times, which reduces the impact of errors that result in incomplete actions.
 
 
 ## Maintenance
 
 At the end of the calendar year, only the main sheets require adjustments to continue operating. This is because the year within the document’s title defines which entries can be entered.
 
-By storing the current and previous year’s sheets together in a folder, both sheets can be processed in parallel and keep only relevant records from being written, enabling redundancy of data within the query and bypassing the requirement of filtering out mismatched year's data from the initial query.
+By storing the current and previous year’s sheets together in a folder, both sheets can be processed in parallel and keep only relevant records from being written, enabling redundancy of data within the query, and bypassing the requirement of filtering out mismatched year's data from the initial query.
 
 > Teams: Commercial Team/ Documents/ General/ Admin/ Booking Sheet
 
 Need picture <<
 
-In December 2025, create a fresh copy of the Booking Sheet, 2026, for the following year. Later in February, archive the 2025 year’s sheet once all samples have been reported and invoiced.
-	
-Flows require no amendment due to the dynamic variables used to calculate the year in which the ending year of the current and previous years' sheets should be relative to the current UTC.
+In December 2025, create a fresh copy of the Booking Sheet for the following year, 2026. Later in February, archive the 2025 sheet once all samples have been reported and invoiced.
+
+Flows do not require any amendments due to the dynamic variables used to calculate the year in which the ending year of the current and previous years' sheets should be relative to the current UTC.
 
 Previous year variable:
 
@@ -67,7 +67,7 @@ All Business Objects files (SQL reports) are stored online at Affinity's BO Port
 
 Need picture here <<
 
-Queries, flows, and Excel scripts are provided in the [appendix](#appendix).
+Queries, flows, and Office scripts are provided in the [appendix](#appendix).
 
 
 ## Detailed Design
@@ -76,7 +76,7 @@ Queries, flows, and Excel scripts are provided in the [appendix](#appendix).
 
 Business Objects generated and delivered scheduled queries from an Oracle database.
 
-These queries shared safety features which were used to restrict which data was pulled from the cloud, reducing the server's memory usage and improving processing speed.
+These queries shared safety features that restricted the data pulled from the cloud, reducing the server's memory usage and improving processing speed.
 
 Techniques used to hone searches were:
 
@@ -100,7 +100,7 @@ WHERE
 	AND sample.status NOT IN ( 'X', 'U' )
 ```
 
-•	Utilizing parameter names:
+•	Utilising parameter names:
 ```
 WHERE
 	test.analysis IN ( 'MATRIX' )
@@ -131,7 +131,7 @@ LEFT JOIN subcon_tests
 	ON subcon_tests.sample = sample.id_numeric
 ```
 
-The selection followed a pattern of searching for an ID, a parameter of interest, and a date of when this change occurred. All samples that were compliant with the filtering conditions were delivered to the next step.
+The selection followed a pattern of searching for an ID, a parameter of interest, and a date of when this change occurred. All samples that met the filtering criteria were passed on to the next step.
 	
 | Sample No | Entered On  | Parameter  |
 |-----------|-------------|------------|
@@ -141,86 +141,49 @@ The selection followed a pattern of searching for an ID, a parameter of interest
 
 ###	Design of flows
 
-Once an email containing the report had been received, a Power Automate flow attempts to match the title of the email to keywords. If a match was found, a series of steps take place to save the attached XLSX file for processing.
+Once an email containing a report has been received, a Power Automate flow attempts to match the email's title to keywords. If a match is found, a series of steps take place to save the attached XLSX file for processing.
 
-To assure reliability, conditional filters were used to eliminate problems which could occur during an action. Considerations included were:
+To ensure reliability, conditional filters were used to eliminate potential problems that could occur during an action. Considerations included were:
 
 •	Confirmation of email requirements:
- 
 
-
-
-
-
-
-
-
+Need picture <<<
 
 •	Check for attachment(s):
 
+Need picture <<<
 
-
-
-
-
-
-
-
-
-
-
-
-
-	
 •	Validation of outgoing data:
 
+Need picture <<<
 
+To improve efficiency, both yearly spreadsheets were acted on using the data from a single query in parallel:
 
+Need picture <<<
 
-	
+### Design of scripts
 
+Power Automate provides access to Excel Online for the use of Office Script, enabling functions to be written and executed on queries. Effort was directed at reducing the number of Excel API calls to improve performance.
 
-
-
-
-
-To improve on efficiency, both yearly spreadsheets were acted on using the data from one query in parallel:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4.3	Design of scripts
-
-4.3.1	Power Automate allows access to Excel Online for the use of Office Script, which enabled functions to be written and act on queries. Effort was directed at reducing the number of Excel API calls to improve performance.
-
-4.3.2	All flows shared one script to extract data from its initial report, which can be found in section 5.3.1. This function was designed to interact with Excel API once and pass on the contents as a string of JSON objects.
+All flows share one script to extract data from its initial report. This function was designed to interact with Excel API once and pass on the contents as a string of JSON objects.
 
 Objects were chosen for their key-value pairs, enabling future table amendments of the Tracking Sheet.
 
 A check for data was placed at the end of the script to terminate impractical flows:
 
+```
+// If there's data, turn range into nested objects
+if (rangeText.length > 1) {
+	const outputData = stringToObjects(rangeText);
+	return JSON.stringify(outputData);
+}
+// Otherwise, return an empty array to stop flow
+else {
+	return '';
+};
+```
 
-
-
-	This data was then fed to a purpose-built program to execute a singular function on the spreadsheet.
+This data was then fed to a purpose-built program to execute a singular function on the spreadsheet.
 
 4.3.3	Beginning with the new records script, data from the Tracking Sheet was extracted in 1 API call and the year of the document in another. Then, records of the incorrect year were removed from the query, and further filtered by positive matches of binary search, leaving a query of exclusively new IDs. These items were then added to the end of the table in 1 API call, giving a total of 3 server requests for the entire report.
 
