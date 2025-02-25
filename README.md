@@ -167,25 +167,26 @@ Power Automate provides access to Excel Online for the use of Office Script, ena
 
 All flows share one script, shown below, to extract data from its initial report. This function was designed to interact with the Excel API once and pass the contents as a string of JSON objects.
 
-Table to Objects script:
-```
-// Function to extract data and output nested objects
-function main(workbook: ExcelScript.Workbook): string {
-	// Select 1st sheet in workbook
-	const selectedSheet = workbook.getWorksheets()[0];
-	// Get the working range as string
-	const usedRange = selectedSheet.getUsedRange();
-	let rangeText = usedRange.getTexts();
-	//console.log(rangeText);
+<details>
+<summary> Table to Objects script: </summary>
+
+	// Function to extract data and output nested objects
+	function main(workbook: ExcelScript.Workbook): string {
+		// Select 1st sheet in workbook
+		const selectedSheet = workbook.getWorksheets()[0];
+		// Get the working range as string
+		const usedRange = selectedSheet.getUsedRange();
+		let rangeText = usedRange.getTexts();
+		//console.log(rangeText);
  
-	// Cleaning string
-	let length = rangeText.length;
+		// Cleaning string
+		let length = rangeText.length;
  
-	while (length--) {
-		// Remove blank rows
-		if (rangeText[length][1] === '') {
-			rangeText.splice(length, 1);
-			continue;
+		while (length--) {
+			// Remove blank rows
+			if (rangeText[length][1] === '') {
+				rangeText.splice(length, 1);
+				continue;
 		};
 
 		// Remove blank columns
@@ -240,7 +241,8 @@ function stringToObjects(tableString: string[][]): string[][] {
 	};
 	return outputArray;
 };
-```
+
+</details>
 
 Objects were chosen for their key-value pairs, enabling future table amendments of the Tracking Sheet.
 
@@ -262,62 +264,9 @@ This data was then fed to a purpose-built program to execute a singular function
 
 Beginning with the new records script, data from the Tracking Sheet was extracted in 1 API call and the year of the document in another. Then, records of the incorrect year were removed from the query and further filtered by positive matches of binary search, leaving a query of exclusively new IDs. These items were then added to the end of the table in 1 API call, giving a total of 3 server requests for the entire report.
 
-New records report:
+New records query:
 
-| Sample No | Entered Date | Text                                                          |
-|-----------|--------------|---------------------------------------------------------------|
-| 2683778   | 03/01/2025   | Giardia not complete due to external processing error         |
-| 2683787   | 20/12/2024   | Taste test removed.                                           |
-| 2684296   | 20/12/2024   | Could not test for Taste and Odour due to missing test bottle |
-
-
-Next, the exceptions and non-conformance scripts were written to read the Tracking Sheet table in 1 API call, concatenating the new parameter/ text to any previous texts within the appropriate cell. Once all of the new, unique data had been strung together, the affected record line was replaced in 2 API calls, for a total of 3 server requests per unique record number in the report.
-
-Exceptions report:
-
-| Sample No | Parameter          | Result |
-|-----------|--------------------|--------|
-| 2689477   | Legionella species | 100    |
-| 2689736   | Legionella species | 2400   |
-| 2692260   | Bromate as BrO3    | 461.2  |
-
-Non-conformance report:
-
-| Sample No | Entered Date | Text                                                          |
-|-----------|--------------|---------------------------------------------------------------|
-| 2683778   | 03/01/2025   | Giardia not complete due to external processing error         |
-| 2683787   | 20/12/2024   | Taste test removed.                                           |
-| 2684296   | 20/12/2024   | Could not test for Taste and Odour due to missing test bottle |
-
-
-Finally, the cancellations, subcon receival, and authorisations scripts were written to draw the Tracking Sheet data in 1 API call, match records using binary search and enter data if required. The affected rows were replaced in the table in 2 API calls, for a total of 3 server requests, per individual item in the report.
-
-	Cancellations report:
-Sample No	Date Authorised
-2665640	3 Jan 2025
-2684715	6 Jan 2025
-2688538	6 Jan 2025
-
-	Subcon Receival report:
-Sample No	Entered On	Parameter
-2688527	14 Jan 2025	LEGIONELLA
-2688527	14 Jan 2025	LEGIONELLA
-2688528	14 Jan 2025	LEGIONELLA
-
-	Authorisations report:
-Sample No	Auth Date	Auth Initials
-2691776	14 Jan 2025	GOLACISD
-2691777	14 Jan 2025	GOLACISD
-2691778	14 Jan 2025	GOLACISD
-
-
-## Appendix
-
-5.1	Business Objects material
-
-5.1.1	New Records
-
-	SQL query:
+```
 WITH subcon_tests AS (
  
 SELECT
@@ -378,17 +327,22 @@ LEFT JOIN subcon_tests
 WHERE
 	sample.recd_date >= TRUNC ( sysdate ) - 10
 	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
+```
 
-	Report:
-Sample No	Date Received	Customer	Booked By	Resample	Weekend Work	Sub-Con	Analysis Description	Cancelled Sample	Description
-2692090	14 Jan 2025	ASCOT_	GEALL			Y	RE_ASCOT1		580832, GRANDSTAND, CORE D, LAWN LEVEL, CLEANERS CUPBOARD, CWS
-2692091	14 Jan 2025	ASCOT_	GEALL			Y	RE_ASCOT1		580830, GRANDSTAND, CORE C, LAWN LEVEL, CLEANERS CUPBOARD, CWS
-2692092	14 Jan 2025	ASCOT_	GEALL			Y	RE_ASCOT1		584032, GRANDSTAND, CORE C, LEVEL 1, CLEANERS CUPBOARD, CWS
+New records report:
+
+|     Sample No    |     Date Received    |     Customer    |     Booked By    |     Resample    |     Weekend Work    |     Sub-Con    |     Analysis Description    |     Cancelled Sample    |     Description                                                         |
+|------------------|----------------------|-----------------|------------------|-----------------|---------------------|----------------|-----------------------------|-------------------------|-------------------------------------------------------------------------|
+|     2692090      |     14 Jan 2025      |     ASCOT_      |     GEALL        |                 |                     |     Y          |     RE_ASCOT1               |                         |     580832,   GRANDSTAND, CORE D, LAWN LEVEL, CLEANERS CUPBOARD, CWS    |
+|     2692091      |     14 Jan 2025      |     ASCOT_      |     GEALL        |                 |                     |     Y          |     RE_ASCOT1               |                         |     580830, GRANDSTAND, CORE C, LAWN   LEVEL, CLEANERS CUPBOARD, CWS    |
+|     2692092      |     14 Jan 2025      |     ASCOT_      |     GEALL        |                 |                     |     Y          |     RE_ASCOT1               |                         |     584032,   GRANDSTAND, CORE C, LEVEL 1, CLEANERS CUPBOARD, CWS       |
 
 
-5.1.2	Exceptions
+Next, the exceptions and non-conformance scripts were written to read the Tracking Sheet table in 1 API call, concatenating the new parameter/ text to any previous texts within the appropriate cell. Once all of the new, unique data had been strung together, the affected record line was replaced in 2 API calls, for a total of 3 server requests per unique record number in the report.
 
-	SQL query:
+Exceptions query:
+
+```
 SELECT
 	TRIM ( sample.id_numeric ),
 	result.name,
@@ -409,52 +363,20 @@ WHERE
 	AND result.result_type IN ( 'N', 'K' )
 	AND result.out_of_range = 'T'
 	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
-	AND result.entered_on >= TRUNC ( sysdate ) - 10 
+	AND result.entered_on >= TRUNC ( sysdate ) - 10
+```
 
-	Report:
-Sample No	Parameter	Result
-2689477	Legionella species	100
-2689736	Legionella species	2400
-2692260	Bromate as BrO3	461.2
+Exceptions report:
 
+| Sample No | Parameter          | Result |
+|-----------|--------------------|--------|
+| 2689477   | Legionella species | 100    |
+| 2689736   | Legionella species | 2400   |
+| 2692260   | Bromate as BrO3    | 461.2  |
 
-5.1.3	Authorisations
+Non-conformance query:
 
-	SQL query:
-SELECT
-	TRIM ( sample.id_numeric ) AS sample_no,
-	TRUNC ( result.date_authorised ) AS authorisation_date,
-	TRIM ( result.authoriser ) AS authoriser
- 
-FROM
-	result
- 
-INNER JOIN test
-	ON test.test_number = result.test_number
- 
-INNER JOIN sample
-	ON sample.id_numeric = test.sample
- 
-WHERE
-	result.status IN ( 'A' )
-	AND test.analysis IN ( 'MATRIX' )
-	AND test.date_authorised >= ( TRUNC ( sysdate ) - 10 )
-	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
-	AND sample.status NOT IN ( 'X', 'U' ) 
-
-	Report:
-Sample No	Auth Date	Auth Initials
-2691776	14 Jan 2025	GOLACISD
-2691777	14 Jan 2025	GOLACISD
-2691778	14 Jan 2025	GOLACISD
-
-
-
-
-
-5.1.4	Non-conformance
-
-	SQL query:
+```
 SELECT
 	TRIM ( sample.id_numeric ) AS sample_no,
 	TRUNC ( result.entered_on ),
@@ -476,17 +398,22 @@ WHERE
 	AND test.analysis = 'NON_CONF_S'
 	AND result.name IN ( 'Text comment 1', 'Text comment 2' )
 	AND result.status IN ( 'A', 'C' )
+```
 
-	Report:
-Sample No	Entered Date	Text
-2683778	03/01/2025	Giardia not complete due to external processing error
-2683787	20/12/2024	Taste test removed.
-2684296	20/12/2024	Could not test for Taste and Odour due to missing test bottle
+Non-conformance report:
+
+| Sample No | Entered Date | Text                                                          |
+|-----------|--------------|---------------------------------------------------------------|
+| 2683778   | 03/01/2025   | Giardia not complete due to external processing error         |
+| 2683787   | 20/12/2024   | Taste test removed.                                           |
+| 2684296   | 20/12/2024   | Could not test for Taste and Odour due to missing test bottle |
 
 
-5.1.5	Cancellations
+Finally, the cancellations, subcon receival, and authorisations scripts were written to draw the Tracking Sheet data in 1 API call, match records using binary search and enter data if required. The affected rows were replaced in the table in 2 API calls, totalling 3 server requests per item in the report.
 
-	SQL query:
+Cancellations query:
+
+```
 SELECT
 	TRIM ( sample.id_numeric ) AS sample_no,
 	TRUNC ( sample.date_authorised ) AS cancelled_date	
@@ -505,24 +432,19 @@ WHERE
 		( sample.date_authorised < TRUNC ( sysdate ) )
 	)
 	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
+```
 
+Cancellations report:
 
+| Sample No | Date Authorised |
+|-----------|-----------------|
+| 2665640   | 3 Jan 2025      |
+| 2684715   | 6 Jan 2025      |
+| 2688538   | 6 Jan 2025      |
 
+Subcon Receival query:
 
-
-
-
-
-	Report:
-Sample No	Date Authorised
-2665640	3 Jan 2025
-2684715	6 Jan 2025
-2688538	6 Jan 2025
-
-
-5.1.6	Subcon Receival
-
-	SQL query:
+```
 SELECT
 	TRIM ( sample.id_numeric ) AS sample_no,
 	result.entered_on,
@@ -541,12 +463,66 @@ WHERE
 	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
 	AND test.laboratory_id = 'SUB_CON'
 	AND TRIM ( result.text ) IS NOT NULL
+```
 
-	Report:
-Sample No	Entered On	Parameter
-2688527	14 Jan 2025	LEGIONELLA
-2688527	14 Jan 2025	LEGIONELLA
-2688528	14 Jan 2025	LEGIONELLA
+Subcon Receival report:
+
+| Sample No | Entered On  | Parameter  |
+|-----------|-------------|------------|
+| 2688527   | 14 Jan 2025 | LEGIONELLA |
+| 2688527   | 14 Jan 2025 | LEGIONELLA |
+| 2688528   | 14 Jan 2025 | LEGIONELLA |
+
+Authorisations query:
+
+```
+SELECT
+	TRIM ( sample.id_numeric ) AS sample_no,
+	TRUNC ( result.date_authorised ) AS authorisation_date,
+	TRIM ( result.authoriser ) AS authoriser
+ 
+FROM
+	result
+ 
+INNER JOIN test
+	ON test.test_number = result.test_number
+ 
+INNER JOIN sample
+	ON sample.id_numeric = test.sample
+ 
+WHERE
+	result.status IN ( 'A' )
+	AND test.analysis IN ( 'MATRIX' )
+	AND test.date_authorised >= ( TRUNC ( sysdate ) - 10 )
+	AND LENGTH ( TRIM ( sample.customer_id ) ) > 0
+	AND sample.status NOT IN ( 'X', 'U' )
+```
+
+Authorisations report:
+
+| Sample No | Auth Date   | Auth Initials |
+|-----------|-------------|---------------|
+| 2691776   | 14 Jan 2025 | GOLACISD      |
+| 2691777   | 14 Jan 2025 | GOLACISD      |
+| 2691778   | 14 Jan 2025 | GOLACISD      |
+
+
+
+5.1.2	
+
+
+5.1.3	
+
+
+
+
+
+5.1.4	
+
+
+5.1.5	
+
+5.1.6	
 
 
 5.2	Power Automate flow:
