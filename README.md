@@ -163,9 +163,84 @@ Need picture <<<
 
 ### Design of scripts
 
-Power Automate provides access to Excel Online for the use of Office Script, enabling functions to be written and executed on queries. Effort was directed at reducing the number of Excel API calls to improve performance.
+Power Automate provides access to Excel Online for the use of Office Script, enabling functions to be written and executed on queries. To improve performance, efforts were directed at reducing the number of Excel API calls.
 
-All flows share one script to extract data from its initial report. This function was designed to interact with Excel API once and pass on the contents as a string of JSON objects.
+All flows share one script, shown below, to extract data from its initial report. This function was designed to interact with the Excel API once and pass the contents as a string of JSON objects.
+
+Table to Objects script:
+```
+// Function to extract data and output nested objects
+function main(workbook: ExcelScript.Workbook): string {
+	// Select 1st sheet in workbook
+	const selectedSheet = workbook.getWorksheets()[0];
+	// Get the working range as string
+	const usedRange = selectedSheet.getUsedRange();
+	let rangeText = usedRange.getTexts();
+	//console.log(rangeText);
+ 
+	// Cleaning string
+	let length = rangeText.length;
+ 
+	while (length--) {
+		// Remove blank rows
+		if (rangeText[length][1] === '') {
+			rangeText.splice(length, 1);
+			continue;
+		};
+
+		// Remove blank columns
+		if (rangeText[length][-1] === '') {
+			rangeText[length].splice(-1, 1);
+			continue;
+		};
+	};
+ 
+	// If there's data, turn range into nested objects
+	if (rangeText.length > 1) {
+		const outputData = stringToObjects(rangeText);
+		//console.log(JSON.stringify(outputData));
+		return JSON.stringify(outputData);
+	}
+	// Otherwise, return an empty array to stop flow
+	else {
+		return '';
+	};
+};
+ 
+// Function to convert a 2D array string to nested objects
+function stringToObjects(tableString: string[][]): string[][] {
+	// Key: Value pairs
+	var objectKeys: string[] = [];
+	// Result
+	var outputArray: string[][] = [];
+ 
+	// for each element in array...
+	for (var index = 0; index < tableString.length; index++) {
+		// Use the 1st element of array as keys
+		if (index === 0) {
+			objectKeys = tableString[index];
+			continue;
+		};
+ 
+		// Empty object to store key and values
+		var tempObject: Object = {};
+ 
+		// For the length of an array within nest...
+		for (var element = 0; element < tableString[index].length; element++) {
+		//console.log(objectKeys[element]);
+ 
+		// Set the value of newObject with objectKeys at position (element);
+		// Using values of tableString at position (index) at key (element)
+		tempObject[objectKeys[element]] = tableString[index][element];
+		};
+ 
+		// Push object into output array
+		outputArray.push(tempObject);
+		continue;
+	};
+	return outputArray;
+};
+```
 
 Objects were chosen for their key-value pairs, enabling future table amendments of the Tracking Sheet.
 
@@ -185,32 +260,37 @@ else {
 
 This data was then fed to a purpose-built program to execute a singular function on the spreadsheet.
 
-4.3.3	Beginning with the new records script, data from the Tracking Sheet was extracted in 1 API call and the year of the document in another. Then, records of the incorrect year were removed from the query, and further filtered by positive matches of binary search, leaving a query of exclusively new IDs. These items were then added to the end of the table in 1 API call, giving a total of 3 server requests for the entire report.
+Beginning with the new records script, data from the Tracking Sheet was extracted in 1 API call and the year of the document in another. Then, records of the incorrect year were removed from the query and further filtered by positive matches of binary search, leaving a query of exclusively new IDs. These items were then added to the end of the table in 1 API call, giving a total of 3 server requests for the entire report.
 
-	New records report:
-Sample No	Entered Date	Text
-2683778	03/01/2025	Giardia not complete due to external processing error
-2683787	20/12/2024	Taste test removed.
-2684296	20/12/2024	Could not test for Taste and Odour due to missing test bottle
+New records report:
+
+| Sample No | Entered Date | Text                                                          |
+|-----------|--------------|---------------------------------------------------------------|
+| 2683778   | 03/01/2025   | Giardia not complete due to external processing error         |
+| 2683787   | 20/12/2024   | Taste test removed.                                           |
+| 2684296   | 20/12/2024   | Could not test for Taste and Odour due to missing test bottle |
 
 
-4.3.4	Next, the exceptions and non-conformance scripts were both written to read the Tracking Sheet table in 1 API call, concatenating the new parameter/ text to any previous texts within the appropriate cell, repeating for the next sample number in the report, and replacing the affected record line in 2 API calls once all of the new, unique data had been strung together, for a total of 3 server requests, per unique record number in the report.
+Next, the exceptions and non-conformance scripts were written to read the Tracking Sheet table in 1 API call, concatenating the new parameter/ text to any previous texts within the appropriate cell. Once all of the new, unique data had been strung together, the affected record line was replaced in 2 API calls, for a total of 3 server requests per unique record number in the report.
 
 Exceptions report:
-Sample No	Parameter	Result
-2689477	Legionella species	100
-2689736	Legionella species	2400
-2692260	Bromate as BrO3	461.2
 
-
+| Sample No | Parameter          | Result |
+|-----------|--------------------|--------|
+| 2689477   | Legionella species | 100    |
+| 2689736   | Legionella species | 2400   |
+| 2692260   | Bromate as BrO3    | 461.2  |
 
 Non-conformance report:
-Sample No	Entered Date	Text
-2683778	03/01/2025	Giardia not complete due to external processing error
-2683787	20/12/2024	Taste test removed.
-2684296	20/12/2024	Could not test for Taste and Odour due to missing test bottle
 
-4.3.4	Finally, the cancellations, subcon receival, and authorisations scripts were written to draw the Tracking Sheet data in 1 API call, match records using binary search and enter data if required. The affected rows were replaced in the table in 2 API calls, for a total of 3 server requests, per individual item in the report.
+| Sample No | Entered Date | Text                                                          |
+|-----------|--------------|---------------------------------------------------------------|
+| 2683778   | 03/01/2025   | Giardia not complete due to external processing error         |
+| 2683787   | 20/12/2024   | Taste test removed.                                           |
+| 2684296   | 20/12/2024   | Could not test for Taste and Odour due to missing test bottle |
+
+
+Finally, the cancellations, subcon receival, and authorisations scripts were written to draw the Tracking Sheet data in 1 API call, match records using binary search and enter data if required. The affected rows were replaced in the table in 2 API calls, for a total of 3 server requests, per individual item in the report.
 
 	Cancellations report:
 Sample No	Date Authorised
